@@ -12580,23 +12580,29 @@ General intuition:</p>
 <div class=" highlight hl-ipython2"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
 
-<span class="n">selected_feature</span> <span class="o">=</span> <span class="s2">&quot;Milk&quot;</span>
+<span class="k">def</span> <span class="nf">feature_score</span><span class="p">(</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+    <span class="c1"># Make a copy of the DataFrame, using the &#39;drop&#39; function to drop the given feature</span>
+    <span class="n">new_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="c1"># Make a copy of the DataFrame, using the &#39;drop&#39; function to drop the given feature</span>
-<span class="n">new_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">selected_feature</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Split the data into training and testing sets using the given feature as the target</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> 
+        <span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">],</span> <span class="n">test_size</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span><span class="p">)</span>
 
-<span class="c1"># Split the data into training and testing sets using the given feature as the target</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> 
-    <span class="n">data</span><span class="p">[</span><span class="n">selected_feature</span><span class="p">],</span> <span class="n">test_size</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">1984</span><span class="p">)</span>
+    <span class="c1"># Create a decision tree regressor and fit it to the training set</span>
+    <span class="n">regressor</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span><span class="p">)</span>
+    <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="c1"># Create a decision tree regressor and fit it to the training set</span>
-<span class="n">regressor</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
-<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="c1"># Return the score of the prediction using the testing set</span>
+    <span class="k">return</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 
-<span class="c1"># Report the score of the prediction using the testing set</span>
-<span class="n">score</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-
-<span class="k">print</span> <span class="s2">&quot;R^2 score of </span><span class="se">\&quot;</span><span class="s2">{}</span><span class="se">\&quot;</span><span class="s2"> feature explained by other features is {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_feature</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="c1"># Average score across multiple random launches</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_score</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">rnd</span><span class="p">)</span> <span class="k">for</span> <span class="n">rnd</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span>
+    <span class="n">mean_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    
+    <span class="c1"># Report the score</span>
+    <span class="k">print</span> <span class="s2">&quot;R^2 score of </span><span class="se">\&quot;</span><span class="s2">{}</span><span class="se">\&quot;</span><span class="s2"> feature explained by other features is {:.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">mean_score</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12609,7 +12615,12 @@ General intuition:</p>
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>R^2 score of &#34;Milk&#34; feature explained by other features is 0.53050926773
+<pre>R^2 score of &#34;Fresh&#34; feature explained by other features is 0.17
+R^2 score of &#34;Milk&#34; feature explained by other features is 0.29
+R^2 score of &#34;Grocery&#34; feature explained by other features is 0.68
+R^2 score of &#34;Frozen&#34; feature explained by other features is 0.11
+R^2 score of &#34;Detergents_Paper&#34; feature explained by other features is 0.69
+R^2 score of &#34;Delicatessen&#34; feature explained by other features is 0.19
 </pre>
 </div>
 </div>
@@ -12634,7 +12645,7 @@ General intuition:</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Answer:</strong> The $R^2$ coefficient is 0.53, which means that "Milk" feature is somehow explained by other features, but not enough to be excluded for identifying customers' spending habits.</p>
+<p><strong>Answer:</strong> Features "Grocery" and "Detergents_Paper" have highest $R^2$ scores - 0.69 and 0.68, respectively - when being explained by other features. It means, that those features are somehow explained by other features. However, I think that those features are relevant and this amount of explanation is not enough for features to be excluded from the dataaset. Of cource, those are first candidates, as the $R^2$ score for other features is extremily low: "Fresh" - 0.17, "Milk" - 0.29, "Frozen" - 0.11 and "Delicatessen" - 0.19.</p>
 
 </div>
 </div>
@@ -19701,10 +19712,10 @@ Variance explained by first 4 principal compnents: 93.11%
 <li>70.68% of variance is explained by first 2 components.</li>
 <li><p>93.11% of variance is explained by first 4 components.</p>
 </li>
-<li><p>PC1 negatively correlates with group of three most similar features: "Paper", "Milk" and "Grocery".</p>
+<li><p>PC1 negatively correlates with group of three most similar features: "Paper", "Milk" and "Grocery". I.e. increase in PC1 leads to decrease in "Paper", "Milk" and "Grocery" plus increase in "Fresh" and "Frozen". Following the logic from Q1 answer, it means that PC1 showns how likely the establishment is restaurant: high P1 - more likely, low - less likely.</p>
 </li>
-<li>PC2 negatively correlates with another group of pretty related features - "Fresh", "Frozen" and "Delicatessen".</li>
-<li>PC3, PC4 models mutual dependencies inside 2nd group, as hey are not so unambiguous.</li>
+<li>PC2 negatively correlates with another group of pretty related features - "Fresh", "Frozen" and "Delicatessen". Generally speaking, PC2 negatively correlates with all features - increase in PC2 leads to decrease in all other features. However, the rate of decrease is stronger for features, that are typical for restaurant. So, PC2 may be another kind of measurment of how unlikely the establishment is a restaurant.</li>
+<li>PC3, PC4 show mutual exclusions in features, that are typical for restaurant. Increase in PC3 leads to increase in "Frozen" and "Delicatessen", which are signs of meat restaruant (steak bar), and decrease in "Fresh" (salad bar). So, PC3 - type of restaurant. PC4 shows trade off between frozen vs delicious meat + fresh - seems like a luxury of a restaruant (lower PC4 - more luxury).</li>
 </ul>
 
 </div>
@@ -19930,7 +19941,7 @@ Variance explained by first 4 principal compnents: 93.11%
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0xd16b0f0&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0xc050438&gt;</pre>
 </div>
 
 </div>
@@ -21109,7 +21120,7 @@ yI/9P4/ytB7LYYVLAAAAAElFTkSuQmCC
     <span class="n">sample_preds</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pca_samples</span><span class="p">)</span>
 
     <span class="c1"># Calculate the mean silhouette coefficient for the number of clusters chosen</span>
-    <span class="n">score</span> <span class="o">=</span> <span class="n">silhouette_score</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">,</span> <span class="n">preds</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">silhouette_score</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s2">&quot;mahalanobis&quot;</span><span class="p">)</span>    
     
     <span class="k">return</span> <span class="n">clusterer</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">sample_preds</span><span class="p">,</span> <span class="n">score</span>
 
@@ -21126,7 +21137,7 @@ yI/9P4/ytB7LYYVLAAAAAElFTkSuQmCC
 <span class="c1"># Optimal amount of clusters</span>
 <span class="n">best_num_clusters</span> <span class="o">=</span> <span class="n">num_clusters</span><span class="p">[</span><span class="n">scores</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">))]</span>
 
-<span class="c1"># Fit once again for best amount of cluster</span>
+<span class="c1"># Fit once again for best amount of clusters</span>
 <span class="n">clusterer</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">sample_preds</span><span class="p">,</span> <span class="n">score</span> <span class="o">=</span> <span class="n">fit_clusterer</span><span class="p">(</span><span class="n">best_num_clusters</span><span class="p">)</span>
 
 <span class="k">print</span> <span class="s2">&quot;Best score {:.4f} - for {} clusters.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">best_num_clusters</span><span class="p">)</span>
@@ -21156,32 +21167,32 @@ yI/9P4/ytB7LYYVLAAAAAElFTkSuQmCC
     <tr>
       <th>0</th>
       <td>2</td>
-      <td>0.421917</td>
+      <td>0.375986</td>
     </tr>
     <tr>
       <th>1</th>
       <td>3</td>
-      <td>0.404249</td>
+      <td>0.366387</td>
     </tr>
     <tr>
       <th>2</th>
       <td>4</td>
-      <td>0.293270</td>
+      <td>0.283791</td>
     </tr>
     <tr>
       <th>3</th>
       <td>5</td>
-      <td>0.300456</td>
+      <td>0.286459</td>
     </tr>
     <tr>
       <th>4</th>
       <td>6</td>
-      <td>0.326139</td>
+      <td>0.314361</td>
     </tr>
     <tr>
       <th>5</th>
       <td>7</td>
-      <td>0.324227</td>
+      <td>0.314255</td>
     </tr>
   </tbody>
 </table>
@@ -21192,7 +21203,7 @@ yI/9P4/ytB7LYYVLAAAAAElFTkSuQmCC
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Best score 0.4219 - for 2 clusters.
+<pre>Best score 0.3760 - for 2 clusters.
 </pre>
 </div>
 </div>
@@ -21216,7 +21227,7 @@ yI/9P4/ytB7LYYVLAAAAAElFTkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Answer:</strong> 2 clusters has the best silhouette score of 0.4219</p>
+<p><strong>Answer:</strong> 2 clusters has the best silhouette score of 0.3760</p>
 
 </div>
 </div>
@@ -22371,7 +22382,15 @@ Sample point 2 predicted to be in Cluster 0
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Answer:</strong> Remembering the assumption from <strong>Question 1</strong> - sample-0 is a retailer, sample-1 is a delicatessen cafe, sample-2 is a salad-bar. And this is 100% confirmed by clustering.</p>
+<p><strong>Answer:</strong></p>
+<ul>
+<li><p>Sample 0. Assumed to be a retailer. Assigned to Cluster-1 of retailers, which agrees with original assumption.</p>
+</li>
+<li><p>Sample 1. Assumed to be a delicatessen cafe. Assigned to Cluster-0 of restaurants and cafes - matches the assumption.</p>
+</li>
+<li><p>Sample 2. Assumed to be a salad-bar. Assigned to Cluster-0 of restaurants and cafes, which agrees with original assumption.</p>
+</li>
+</ul>
 
 </div>
 </div>
