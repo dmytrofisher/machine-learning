@@ -337,6 +337,10 @@ class Environment(object):
                 reward += 2 - penalty # (2, 1)
             elif action == None and light != 'green': # Was the agent stuck at a red light?
                 reward += 2 - penalty # (2, 1)
+            elif agent.get_next_waypoint() == 'left' and action == 'right':
+                reward -= 3
+            elif agent.get_next_waypoint() == 'right' and action == 'left':
+                reward -= 3
             else: # Valid but incorrect
                 reward += 1 - penalty # (1, 0)
 
