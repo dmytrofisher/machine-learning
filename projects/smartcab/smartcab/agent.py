@@ -203,6 +203,4 @@ def run(simulation_index = 0):
     sim.run(n_test = 100, tolerance = decay_function(n_trials))
 
 if __name__ == '__main__':
-    #for i in range(0, 10):
-    #    run(i)
-    run(0)
+    run()
